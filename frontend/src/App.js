@@ -15,7 +15,7 @@ function App() {
     try {
       setIsAsking(true);
       setStatusMessage("");
-      const res = await axios.post("http://localhost:8000/ask", {
+      const res = await axios.post("https://indexmind.onrender.com/ask", {
         question,
       });
       setAnswer(res.data.answer || "No answer returned.");
@@ -37,7 +37,7 @@ function App() {
     try {
       setIsUploading(true);
       setStatusMessage("");
-      await axios.post("http://localhost:8000/upload", formData);
+      await axios.post("https://indexmind.onrender.com/upload", formData);
       setStatusMessage("File uploaded successfully.");
     } catch (error) {
       setStatusMessage("File upload failed. Please retry.");
