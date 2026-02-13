@@ -13,9 +13,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    file_path = f"temp_{file.filename}"
+    import os
+    upload_dir = "/tmp"
+    os.makedirs(upload_dir, exist_ok=True)
+    file_path = os.path.join(upload_dir, f"temp_{file.filename}")
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
