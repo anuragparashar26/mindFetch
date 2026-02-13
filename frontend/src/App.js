@@ -27,7 +27,7 @@ function LandingPage() {
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="logo-text">MindIndex</span>
+            <span className="logo-text">IndexMind</span>
           </div>
           <div className="nav-links">
             <a href="#home">Home</a>
@@ -91,7 +91,7 @@ function LandingPage() {
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span className="logo-text">MindIndex</span>
+              <span className="logo-text">IndexMind</span>
             </div>
             <p>Search your documents instantly with AI-powered answers.</p>
           </div>
