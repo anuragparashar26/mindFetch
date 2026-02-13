@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+faiss-cpu
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+google-generativeai
+pypdf
+python-multipart
+numpy
