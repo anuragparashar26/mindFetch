@@ -54,7 +54,7 @@ function LandingPage() {
 
       <section className="features-section" id="features">
         <div className="features-container">
-          <h2>Why Choose Our Knowledge Base</h2>
+          <h2>Why Choose IndexMind</h2>
           <div className="features-grid">
             <div className="feature-card">
               <svg className="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -115,7 +115,7 @@ function LandingPage() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2026 Knowledge Base. All rights reserved.</p>
+          <p>&copy; 2026 IndexMind. All rights reserved.</p>
         </div>
       </footer>
     </div>
@@ -315,7 +315,7 @@ function WorkspacePage() {
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="logo-text">Knowledge Base</span>
+            <span className="logo-text">IndexMind</span>
           </div>
           <div className="workspace-actions">
             <button className="action-btn" onClick={clearConversation} title="Clear conversation">
