@@ -1,0 +1,6 @@
+backend/__pycache__
+backend/faiss_index
+backend/temp_doc.pdf
+
+frontend/node_modules
+
