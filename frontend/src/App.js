@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Security from "./pages/Security";
 import "./App.css";
 
 function App() {
@@ -10,6 +15,11 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/workspace" element={<WorkspacePage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/security" element={<Security />} />
       </Routes>
     </BrowserRouter>
   );
@@ -23,11 +33,8 @@ function LandingPage() {
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-logo">
-            <svg className="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span className="logo-text">IndexMind</span>
+            <img src={process.env.PUBLIC_URL + "/icons/black.png"} alt="logo" className="logo-icon" />
+            <span className="logo-text">mindFetch</span>
           </div>
           <div className="nav-links">
             <a href="#home">Home</a>
@@ -41,20 +48,23 @@ function LandingPage() {
 
       <section className="hero-section" id="home">
         <div className="hero-content">
-          <span className="hero-badge">Personal Knowledge Base</span>
-          <h1>Search Your Documents Instantly</h1>
+          <span className="hero-badge">Your Personal Knowledge Base</span>
+          <h1>Turn Your Documents Into Instant Answers</h1>
           <p>
             Upload your files and ask questions with an elegant workflow for intelligent document search and high-quality answers.
           </p>
           <button type="button" className="hero-cta" onClick={() => navigate("/workspace")}>
-            Get Started
+            Let's Go
           </button>
+          <div className="free-forever-msg">
+            <span><strong>Completely free</strong>, no credit card or sign up required.</span>
+          </div>
         </div>
       </section>
 
       <section className="features-section" id="features">
         <div className="features-container">
-          <h2>Why Choose IndexMind</h2>
+          <h2>Why Choose mindFetch</h2>
           <div className="features-grid">
             <div className="feature-card">
               <svg className="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -87,35 +97,27 @@ function LandingPage() {
         <div className="footer-container">
           <div className="footer-brand">
             <div className="footer-logo">
-              <svg className="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span className="logo-text">IndexMind</span>
+              <img src={process.env.PUBLIC_URL + "/icons/white.png"} alt="logo" className="logo-icon" />
+              <span className="logo-text">mindFetch</span>
             </div>
             <p>Search your documents instantly with AI-powered answers.</p>
           </div>
           <div className="footer-links">
             <div className="footer-column">
               <h4>Product</h4>
-              <a href="#features">Features</a>
-              <a href="/workspace">Get Started</a>
-            </div>
-            <div className="footer-column">
-              <h4>Company</h4>
-              <a href="#home">About</a>
-              <a href="#home">Contact</a>
+              <a href="/about">About</a>
+              <a href="/contact">Contact</a>
             </div>
             <div className="footer-column">
               <h4>Legal</h4>
-              <a href="#home">Privacy</a>
-              <a href="#home">Terms</a>
-              <a href="#home">Security</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
+              <a href="/security">Security</a>
             </div>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2026 IndexMind. All rights reserved.</p>
+          <p>&copy; 2026 mindFetch. All rights reserved.</p>
         </div>
       </footer>
     </div>
@@ -311,11 +313,8 @@ function WorkspacePage() {
       <nav className="navbar workspace-nav">
         <div className="nav-container">
           <div className="nav-logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-            <svg className="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span className="logo-text">IndexMind</span>
+            <img src={process.env.PUBLIC_URL + "/icons/black.png"} alt="logo" className="logo-icon" />
+            <span className="logo-text">mindFetch</span>
           </div>
           <div className="workspace-actions">
             <button className="action-btn" onClick={clearConversation} title="Clear conversation">

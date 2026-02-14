@@ -1,3 +1,88 @@
+.free-forever-msg {
+  margin-top: 16px;
+  font-size: 1rem;
+  color: var(--accent-color);
+  text-align: center;
+  font-weight: 500;
+}
+/* Generic page section styling for About, Contact, Privacy, Terms, Security */
+.page-section {
+  padding: 80px 24px 120px;
+  background: var(--panel-color);
+}
+
+.page-container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: grid;
+  gap: 40px;
+  text-align: center;
+}
+
+.page-container h1 {
+  font-size: 2.5rem;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.page-container p {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin: 0 auto;
+}
+
+.page-content {
+  text-align: left;
+  max-width: 800px;
+  margin: 0 auto;
+  display: grid;
+  gap: 32px;
+}
+
+.page-content h2 {
+  font-size: 1.75rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.page-content p {
+  font-size: 1rem;
+  margin: 0 0 12px;
+}
+
+.page-content ul {
+  margin: 0 0 12px;
+  padding-left: 24px;
+  list-style: disc;
+}
+
+.page-content li {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 8px;
+}
+
+.last-updated {
+  font-size: 0.875rem !important;
+  color: var(--text-secondary) !important;
+  font-style: italic;
+  margin-top: -20px !important;
+}
+
+.contact-link {
+  color: var(--accent-color);
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.contact-link:hover {
+  opacity: 0.7;
+}
 .app-wrapper {
   min-height: 100vh;
   height: 100dvh;
@@ -33,12 +118,14 @@
 }
 
 .logo-icon {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 48px;
+  object-fit: contain;
   color: var(--accent-color);
 }
 
 .logo-text {
+  font-size: xx-large;
   letter-spacing: -0.02em;
 }
 
@@ -64,7 +151,7 @@
   background: var(--accent-color);
   color: #fff;
   padding: 8px 20px;
-  border-radius: 6px;
+  border-radius: 0;
   font-weight: 600;
   font-size: 0.9375rem;
   cursor: pointer;
@@ -99,6 +186,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   justify-self: center;
+  border: 2px solid var(--accent-color);
 }
 
 .hero-section h1 {
@@ -120,7 +208,7 @@
 .hero-cta {
   margin: 0 auto;
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   height: 52px;
   padding: 0 32px;
   background: var(--accent-color);
@@ -365,7 +453,7 @@
 
 .ask-row button {
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--accent-color);
   color: #fff;
   font-weight: 600;
@@ -511,7 +599,7 @@
 }
 
 .footer-column a:hover {
-  color: var(--accent-color);
+  color: rgba(255, 255, 255, 1);
 }
 
 .footer-bottom {
@@ -550,7 +638,7 @@
   background: var(--surface-color);
   color: var(--text-primary);
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -700,7 +788,7 @@
 .btn-danger {
   border: none;
   padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
@@ -1063,7 +1151,7 @@
   border: none;
   background: var(--accent-color);
   color: #fff;
-  border-radius: 8px;
+  border-radius: 0;
   cursor: pointer;
   transition: background 0.2s ease;
   display: flex;
