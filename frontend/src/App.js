@@ -173,7 +173,7 @@ function WorkspacePage() {
       setStatusMessage("");
       setStatusType("info");
       
-      const res = await axios.post("https://indexmind.onrender.com/ask", {
+      const res = await axios.post("http://localhost:8000/ask", {
         question: userQuestion,
       });
       
@@ -260,7 +260,7 @@ function WorkspacePage() {
       setUploadProgress(0);
       setStatusMessage("");
       setStatusType("info");
-      await axios.post("https://indexmind.onrender.com/upload", formData, {
+      await axios.post("http://localhost:8000/upload", formData, {
         onUploadProgress: (progressEvent) => {
           const total = progressEvent.total || file.size;
           const nextProgress = total ? Math.round((progressEvent.loaded / total) * 100) : 0;
