@@ -27,16 +27,26 @@ function App() {
 
 function LandingPage() {
   const navigate = useNavigate();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
     <div className="app-wrapper">
-      <nav className="navbar">
+      <nav className="navbar nav-with-toggle">
         <div className="nav-container">
           <div className="nav-logo">
             <img src={process.env.PUBLIC_URL + "/icons/black.png"} alt="logo" className="logo-icon" />
             <span className="logo-text">mindFetch</span>
           </div>
-          <div className="nav-links">
+          <button
+            className="nav-toggle"
+            type="button"
+            aria-label="Toggle navigation"
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          >
+            ☰
+          </button>
+          <div className={`nav-links ${mobileNavOpen ? "mobile-open" : ""}`}>
             <a href="#home">Home</a>
             <a href="#features">Features</a>
             <button className="nav-cta" onClick={() => navigate("/workspace")}>
@@ -126,6 +136,7 @@ function LandingPage() {
 
 function WorkspacePage() {
   const navigate = useNavigate();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -328,7 +339,16 @@ function WorkspacePage() {
             <img src={process.env.PUBLIC_URL + "/icons/black.png"} alt="logo" className="logo-icon" />
             <span className="logo-text">mindFetch</span>
           </div>
-          <div className="workspace-actions">
+          <button
+            className="nav-toggle"
+            type="button"
+            aria-label="Toggle workspace menu"
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          >
+            ☰
+          </button>
+          <div className={`workspace-actions ${mobileNavOpen ? "mobile-open" : ""}`}>
             <button className="action-btn" onClick={clearConversation} title="Clear conversation">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2v20M2 12h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
