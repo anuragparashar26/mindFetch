@@ -43,8 +43,8 @@ knowledge-base/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/knowledge-base.git
-cd knowledge-base
+git clone https://github.com/anuragparashar26/mindFetch.git
+cd mindFetch
 ```
 
 ### 2. Setup the Backend
