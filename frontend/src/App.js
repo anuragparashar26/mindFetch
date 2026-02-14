@@ -138,6 +138,7 @@ function WorkspacePage() {
   const [showClearModal, setShowClearModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState("");
+  const [articleContext, setArticleContext] = useState(null);
 
   const fileInputRef = useRef(null);
   const chatEndRef = useRef(null);
@@ -150,6 +151,17 @@ function WorkspacePage() {
       } catch (e) {
         console.error("Failed to load conversation history", e);
       }
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleSlug = urlParams.get('article');
+    const articleTitle = urlParams.get('title');
+    
+    if (articleSlug && articleTitle) {
+      setArticleContext({ slug: articleSlug, title: articleTitle });
+      setStatusMessage(`Article "${articleTitle}" loaded! Ask me anything about it.`);
+      setStatusType("success");
+      setTimeout(() => setStatusMessage(""), 5000);
     }
   }, []);
 
@@ -327,7 +339,7 @@ function WorkspacePage() {
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Export
+              Export Chat
             </button>
           </div>
         </div>
@@ -391,6 +403,27 @@ function WorkspacePage() {
 
       <div className="workspace-layout">
         <main className="workspace-main">
+          {articleContext && (
+            <div className="article-context-banner" style={{
+              padding: '1rem 1.5rem',
+              margin: '1rem',
+              background: 'linear-gradient(90deg, #111111, #000000)',
+              color: 'white',
+              borderRadius: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            }}>
+              <svg style={{ width: '24px', height: '24px', flexShrink: 0 }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>Blog Article Loaded</div>
+                <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>{articleContext.title}</div>
+              </div>
+            </div>
+          )}
           <div className="conversation-container">
             {conversationHistory.length === 0 ? (
               <div className="empty-state">
@@ -398,8 +431,12 @@ function WorkspacePage() {
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <h3>Start a Conversation</h3>
-                <p>Upload a document and ask your first question to get started.</p>
+                <p>{articleContext 
+                  ? "The article has been loaded. Ask your first question about it!"
+                  : "Upload a document and ask your first question to get started."
+                }</p>
                 
+                {!articleContext && (
                 <label
                   className={`upload-dropzone ${isDragActive ? "drag-active" : ""} ${
                     isUploading ? "uploading" : ""
@@ -439,6 +476,7 @@ function WorkspacePage() {
                     disabled={isUploading}
                   />
                 </label>
+                )}
               </div>
             ) : (
               <div className="conversation-history">
@@ -526,7 +564,10 @@ function WorkspacePage() {
                 className="chat-input"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Ask a question about your documents..."
+                placeholder={articleContext 
+                  ? `Ask a question about "${articleContext.title}"...`
+                  : "Ask a question about your documents..."
+                }
                 disabled={isAsking}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {

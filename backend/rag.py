@@ -7,6 +7,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.embeddings import Embeddings
+from langchain_core.documents import Document
 
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 GEMINI_EMBED_MODEL = os.getenv("GEMINI_EMBED_MODEL", "models/gemini-embedding-001")
@@ -66,6 +67,24 @@ def create_vector_store(file_path):
     return vectorstore
 
 
+def create_vector_store_from_text(text: str, metadata: dict = None):
+    """Create a vector store from plain text content (e.g., blog article)"""
+    if metadata is None:
+        metadata = {}
+    
+    doc = Document(page_content=text, metadata=metadata)
+    
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200
+    )
+    chunks = splitter.split_documents([doc])
+
+    vectorstore = FAISS.from_documents(chunks, embeddings)
+    vectorstore.save_local("faiss_index")
+    return vectorstore
+
+
 def load_vector_store():
     return FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
 
@@ -74,10 +93,12 @@ def ask_question(question):
     vectorstore = load_vector_store()
     retriever = vectorstore.as_retriever()
 
-    # NEW API
     docs = retriever.invoke(question)
 
     context = "\n\n".join([doc.page_content for doc in docs])
+
+    if not context.strip():
+        return "I don't have enough information to answer that question.", []
 
     prompt = f"""
     Answer based only on this context:
