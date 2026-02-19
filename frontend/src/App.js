@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
@@ -7,7 +7,27 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Security from "./pages/Security";
+import HistorySidebar from "./components/HistorySidebar";
 import "./App.css";
+
+const SESSIONS_KEY = "mf-chat-sessions";
+
+const loadSessions = () => {
+  try {
+    const stored = localStorage.getItem(SESSIONS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveSessions = (sessions) => {
+  try {
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+  } catch (e) {
+    console.error("Failed to save sessions", e);
+  }
+};
 
 function App() {
   return (
@@ -136,7 +156,12 @@ function LandingPage() {
 
 function WorkspacePage() {
   const navigate = useNavigate();
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sessions, setSessions] = useState(loadSessions);
+  const [currentSessionId, setCurrentSessionId] = useState(() => {
+    const s = loadSessions();
+    return s.length > 0 ? s[0].id : null;
+  });
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -145,8 +170,6 @@ function WorkspacePage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFileName, setSelectedFileName] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState([]);
-  const [showClearModal, setShowClearModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [articleContext, setArticleContext] = useState(null);
@@ -154,20 +177,13 @@ function WorkspacePage() {
   const fileInputRef = useRef(null);
   const chatEndRef = useRef(null);
 
+  const currentSession = sessions.find((s) => s.id === currentSessionId) || null;
+  const conversationHistory = useMemo(() => currentSession?.messages ?? [], [currentSession]);
+
   useEffect(() => {
-    const saved = localStorage.getItem("kb-conversation-history");
-    if (saved) {
-      try {
-        setConversationHistory(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to load conversation history", e);
-      }
-    }
-    
     const urlParams = new URLSearchParams(window.location.search);
-    const articleSlug = urlParams.get('article');
-    const articleTitle = urlParams.get('title');
-    
+    const articleSlug = urlParams.get("article");
+    const articleTitle = urlParams.get("title");
     if (articleSlug && articleTitle) {
       setArticleContext({ slug: articleSlug, title: articleTitle });
       setStatusMessage(`Article "${articleTitle}" loaded! Ask me anything about it.`);
@@ -177,14 +193,31 @@ function WorkspacePage() {
   }, []);
 
   useEffect(() => {
-    if (conversationHistory.length > 0) {
-      localStorage.setItem("kb-conversation-history", JSON.stringify(conversationHistory));
-    }
-  }, [conversationHistory]);
-
-  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversationHistory]);
+
+  const handleNewChat = () => {
+    setCurrentSessionId(null);
+    setSidebarOpen(false);
+    setSelectedFileName("");
+    setUploadProgress(0);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleSelectSession = (id) => {
+    setCurrentSessionId(id);
+    setSidebarOpen(false);
+  };
+
+  const handleDeleteSession = (id) => {
+    const updated = sessions.filter((s) => s.id !== id);
+    setSessions(updated);
+    saveSessions(updated);
+    if (currentSessionId === id) {
+      setCurrentSessionId(updated.length > 0 ? updated[0].id : null);
+    }
+    axios.delete(`https://indexmind.onrender.com/session/${id}`).catch(() => {});
+  };
 
   const askQuestion = async () => {
     if (!question.trim() || isAsking) return;
@@ -193,29 +226,51 @@ function WorkspacePage() {
     setQuestion("");
     setCurrentQuestion(userQuestion);
 
+    let sessionId = currentSessionId;
+    let updatedSessions = [...sessions];
+
+    if (!sessionId) {
+      sessionId = Date.now().toString();
+      const title =
+        userQuestion.length > 55 ? userQuestion.substring(0, 55) + "…" : userQuestion;
+      const newSession = {
+        id: sessionId,
+        title,
+        createdAt: new Date().toISOString(),
+        messages: [],
+      };
+      updatedSessions = [newSession, ...updatedSessions];
+      setCurrentSessionId(sessionId);
+      setSessions(updatedSessions);
+    }
+
     try {
       setIsAsking(true);
       setStatusMessage("");
       setStatusType("info");
-      
+
       const res = await axios.post("https://indexmind.onrender.com/ask", {
         question: userQuestion,
+        session_id: sessionId,
       });
-      
+
       const aiAnswer = res.data.answer || "No answer returned.";
-      
       const newEntry = {
         id: Date.now(),
         question: userQuestion,
         answer: aiAnswer,
         timestamp: new Date().toISOString(),
       };
-      
-      setConversationHistory(prev => [...prev, newEntry]);
+
+      const finalSessions = updatedSessions.map((s) =>
+        s.id === sessionId ? { ...s, messages: [...s.messages, newEntry] } : s
+      );
+      setSessions(finalSessions);
+      saveSessions(finalSessions);
     } catch (error) {
       setStatusType("error");
       setStatusMessage("Could not fetch answer. Please try again.");
-      
+
       const errorEntry = {
         id: Date.now(),
         question: userQuestion,
@@ -223,24 +278,15 @@ function WorkspacePage() {
         timestamp: new Date().toISOString(),
         isError: true,
       };
-      
-      setConversationHistory(prev => [...prev, errorEntry]);
+
+      const finalSessions = updatedSessions.map((s) =>
+        s.id === sessionId ? { ...s, messages: [...s.messages, errorEntry] } : s
+      );
+      setSessions(finalSessions);
+      saveSessions(finalSessions);
     } finally {
       setIsAsking(false);
     }
-  };
-
-  const clearConversation = () => {
-    setShowClearModal(true);
-  };
-
-  const confirmClear = () => {
-    setConversationHistory([]);
-    localStorage.removeItem("kb-conversation-history");
-    setStatusMessage("Conversation cleared");
-    setStatusType("info");
-    setShowClearModal(false);
-    setTimeout(() => setStatusMessage(""), 3000);
   };
 
   const exportConversation = () => {
@@ -254,15 +300,17 @@ function WorkspacePage() {
   };
 
   const confirmExport = () => {
-    const exportData = conversationHistory.map((entry, index) => {
-      return `\n--- Message ${index + 1} ---\nTime: ${new Date(entry.timestamp).toLocaleString()}\n\nQuestion: ${entry.question}\n\nAnswer: ${entry.answer}\n`;
-    }).join("\n" + "=".repeat(50));
+    const exportData = conversationHistory
+      .map((entry, index) => {
+        return `\n--- Message ${index + 1} ---\nTime: ${new Date(entry.timestamp).toLocaleString()}\n\nQuestion: ${entry.question}\n\nAnswer: ${entry.answer}\n`;
+      })
+      .join("\n" + "=".repeat(50));
 
     const blob = new Blob([exportData], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `conversation-${new Date().toISOString().split("T")[0]}.txt`;
+    a.download = `chat-${new Date().toISOString().split("T")[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -277,8 +325,28 @@ function WorkspacePage() {
     if (!file || isUploading) return;
 
     setSelectedFileName(file.name);
+
+    let sessionId = currentSessionId;
+    let updatedSessions = [...sessions];
+
+    if (!sessionId) {
+      sessionId = Date.now().toString();
+      const title = file.name.replace(/\.[^/.]+$/, "");
+      const newSession = {
+        id: sessionId,
+        title,
+        createdAt: new Date().toISOString(),
+        messages: [],
+      };
+      updatedSessions = [newSession, ...updatedSessions];
+      setCurrentSessionId(sessionId);
+      setSessions(updatedSessions);
+      saveSessions(updatedSessions);
+    }
+
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("session_id", sessionId);
 
     try {
       setIsUploading(true);
@@ -333,60 +401,52 @@ function WorkspacePage() {
 
   return (
     <div className="workspace-page">
-      <nav className="navbar workspace-nav">
-        <div className="nav-container">
-          <div className="nav-logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-            <img src={process.env.PUBLIC_URL + "/icons/black.png"} alt="logo" className="logo-icon" />
-            <span className="logo-text">mindFetch</span>
-          </div>
-          <button
-            className="nav-toggle"
-            type="button"
-            aria-label="Toggle workspace menu"
-            aria-expanded={mobileNavOpen}
-            onClick={() => setMobileNavOpen(!mobileNavOpen)}
-          >
-            ☰
-          </button>
-          <div className={`workspace-actions ${mobileNavOpen ? "mobile-open" : ""}`}>
-            <button className="action-btn" onClick={clearConversation} title="Clear conversation">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2v20M2 12h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              New Chat
-            </button>
-            <button className="action-btn" onClick={exportConversation} title="Export conversation">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Export Chat
-            </button>
-          </div>
-        </div>
-      </nav>
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
 
-      {/* Clear Conversation Modal */}
-      {showClearModal && (
-        <div className="modal-overlay" onClick={() => setShowClearModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Clear Conversation</h3>
-              <button className="modal-close" onClick={() => setShowClearModal(false)}>
+      {/* Sidebar */}
+      <div className={`chat-sidebar-wrapper ${sidebarOpen ? "sidebar-visible" : ""}`}>
+        <HistorySidebar
+          sessions={sessions}
+          currentSessionId={currentSessionId}
+          onNewChat={handleNewChat}
+          onSelectSession={handleSelectSession}
+          onDeleteSession={handleDeleteSession}
+          onClose={() => setSidebarOpen(false)}
+          isMobile={sidebarOpen}
+        />
+      </div>
+
+      <div className="workspace-body">
+        <nav className="navbar workspace-nav">
+          <div className="nav-container">
+            <div className="nav-logo-group">
+              <button
+                className="sidebar-toggle-btn"
+                aria-label="Toggle sidebar"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
               </button>
+              <div className="nav-logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+                <img src={process.env.PUBLIC_URL + "/icons/black.png"} alt="logo" className="logo-icon" />
+                <span className="logo-text">mindFetch</span>
+              </div>
             </div>
-            <div className="modal-body">
-              <p>Are you sure you want to clear all conversation history? This action cannot be undone.</p>
-            </div>
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setShowClearModal(false)}>Cancel</button>
-              <button className="btn-danger" onClick={confirmClear}>Clear</button>
+            <div className="workspace-actions">
+              <button className="action-btn" onClick={exportConversation} title="Export conversation">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Export Chat
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        </nav>
 
       {/* Export Conversation Modal */}
       {showExportModal && (
@@ -422,7 +482,7 @@ function WorkspacePage() {
       )}
 
       <div className="workspace-layout">
-        <main className="workspace-main">
+        <main className="workspace-main" onClick={() => sidebarOpen && setSidebarOpen(false)}>
           {articleContext && (
             <div className="article-context-banner" style={{
               padding: '1rem 1.5rem',
@@ -618,6 +678,7 @@ function WorkspacePage() {
           {statusMessage}
         </div>
       )}
+      </div>
     </div>
   );
 }
