@@ -13,8 +13,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+def root():
+    return {"message": "Backend is running"}
 
-@app.post("/upload")
+@app.post("/upload")                                                                                        
 async def upload_file(file: UploadFile = File(...), session_id: str = Form(...)):
     import os
     upload_dir = "/tmp"
