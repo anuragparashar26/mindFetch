@@ -58,7 +58,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 # Set your Gemini API key
 export GEMINI_API_KEY=your_gemini_api_key
-python3 main.py
+python3 -m uvicorn main:app --reload
 ```
 
 ### 3. Setup the Frontend
