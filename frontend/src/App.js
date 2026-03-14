@@ -216,7 +216,7 @@ function WorkspacePage() {
     if (currentSessionId === id) {
       setCurrentSessionId(updated.length > 0 ? updated[0].id : null);
     }
-    axios.delete(`https://mfapi.anuragparashar.tech/session/${id}`).catch(() => {});
+    axios.delete(`https://mindfetch-production.up.railway.app/session/${id}`).catch(() => {});
   };
 
   const askQuestion = async () => {
@@ -249,7 +249,7 @@ function WorkspacePage() {
       setStatusMessage("");
       setStatusType("info");
 
-      const res = await axios.post("https://mfapi.anuragparashar.tech/ask", {
+      const res = await axios.post("https://mindfetch-production.up.railway.app/ask", {
         question: userQuestion,
         session_id: sessionId,
       });
@@ -353,7 +353,7 @@ function WorkspacePage() {
       setUploadProgress(0);
       setStatusMessage("");
       setStatusType("info");
-      await axios.post("https://mfapi.anuragparashar.tech/upload", formData, {
+      await axios.post("https://mindfetch-production.up.railway.app/upload", formData, {
         onUploadProgress: (progressEvent) => {
           const total = progressEvent.total || file.size;
           const nextProgress = total ? Math.round((progressEvent.loaded / total) * 100) : 0;
