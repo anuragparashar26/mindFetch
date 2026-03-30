@@ -159,6 +159,11 @@ function WorkspacePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sessions, setSessions] = useState(loadSessions);
   const [currentSessionId, setCurrentSessionId] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlSessionId = urlParams.get("session") || urlParams.get("session_id");
+    if (urlSessionId) {
+      return urlSessionId;
+    }
     const s = loadSessions();
     return s.length > 0 ? s[0].id : null;
   });
@@ -184,8 +189,34 @@ function WorkspacePage() {
     const urlParams = new URLSearchParams(window.location.search);
     const articleSlug = urlParams.get("article");
     const articleTitle = urlParams.get("title");
+    const articleSessionId = urlParams.get("session") || urlParams.get("session_id");
+
     if (articleSlug && articleTitle) {
-      setArticleContext({ slug: articleSlug, title: articleTitle });
+      setArticleContext({
+        slug: articleSlug,
+        title: articleTitle,
+        sessionId: articleSessionId,
+      });
+
+      if (articleSessionId) {
+        setCurrentSessionId(articleSessionId);
+        setSessions((prevSessions) => {
+          if (prevSessions.some((session) => session.id === articleSessionId)) {
+            return prevSessions;
+          }
+
+          const newSession = {
+            id: articleSessionId,
+            title: articleTitle,
+            createdAt: new Date().toISOString(),
+            messages: [],
+          };
+          const nextSessions = [newSession, ...prevSessions];
+          saveSessions(nextSessions);
+          return nextSessions;
+        });
+      }
+
       setStatusMessage(`Article "${articleTitle}" loaded! Ask me anything about it.`);
       setStatusType("success");
       setTimeout(() => setStatusMessage(""), 5000);
@@ -226,7 +257,7 @@ function WorkspacePage() {
     setQuestion("");
     setCurrentQuestion(userQuestion);
 
-    let sessionId = currentSessionId;
+    let sessionId = currentSessionId || articleContext?.sessionId || null;
     let updatedSessions = [...sessions];
 
     if (!sessionId) {

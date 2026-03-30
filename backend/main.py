@@ -1,6 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
+import uuid
 from rag import create_vector_store, create_vector_store_from_text, ask_question, delete_vector_store
 
 app = FastAPI()
@@ -36,13 +37,10 @@ async def upload_article(data: dict):
     article_text = data.get("content", "")
     article_title = data.get("title", "Untitled Article")
     article_slug = data.get("slug", "")
-    session_id = data.get("session_id")
+    session_id = data.get("session_id") or uuid.uuid4().hex
 
-    if not article_text:
-        return {"error": "No content provided"}, 400
-
-    if not session_id:
-        return {"error": "session_id is required"}, 400
+    if not article_text.strip():
+        raise HTTPException(status_code=400, detail="No content provided")
 
     metadata = {
         "source": "blog_article",
@@ -60,8 +58,11 @@ async def upload_article(data: dict):
 
 @app.post("/ask")
 async def ask(data: dict):
-    question = data["question"]
+    question = data.get("question", "").strip()
     session_id = data.get("session_id")
+
+    if not question:
+        raise HTTPException(status_code=400, detail="question is required")
 
     if not session_id:
         return {"answer": "No session provided. Please upload a document first.", "sources": []}
