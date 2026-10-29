@@ -12,7 +12,11 @@ from langchain_core.documents import Document
 
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 GEMINI_EMBED_MODEL = os.getenv("GEMINI_EMBED_MODEL", "models/gemini-embedding-001")
-FAISS_INDEX_BASE = "faiss_index"
+# Vercel's deployment filesystem is read-only. /tmp is writable but ephemeral.
+FAISS_INDEX_BASE = os.getenv(
+    "FAISS_INDEX_BASE",
+    "/tmp/faiss_index" if os.getenv("VERCEL") else "faiss_index",
+)
 
 
 def _configure_gemini():
